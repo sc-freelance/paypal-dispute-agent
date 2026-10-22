@@ -2,6 +2,16 @@
 
 You are my coding partner for the **PayPal AI Hackathon** (Devpost). Read this whole brief before doing anything. It is the source of truth for the project, and I'll keep it in the repo as `CLAUDE.md`.
 
+## Decisions log
+
+Decisions Saad has made. These override any open question further down this brief.
+
+| Date | Decision | Choice |
+|---|---|---|
+| Thu 22 Oct 2026 | Backend framework | **Django + Django REST Framework** (not FastAPI) |
+| Thu 22 Oct 2026 | Frontend language | **JavaScript** (not TypeScript) |
+| Thu 22 Oct 2026 | Serving the React build | **Django serves the built React app itself** (one Render web service, not a separate static site) |
+
 ---
 
 ## 1. Who I am and how we work together
@@ -116,7 +126,7 @@ If we're ahead of schedule in week 3, propose **one** stretch item and let me ch
 
 **Backend: Django + Django REST Framework.**
 - Apps along the lines of `paypal_client`, `invoices`, `disputes`, `agent` and `insights`.
-- **Before we start, double-check with me whether to keep Django or switch to FastAPI.** Django is better for my CV, but FastAPI is lighter for my limited hours.
+- **Decided (22 Oct): keep Django.** Django is better for my CV.
 
 **PayPal wrapper (`paypal_client/`).**
 - A clean service layer covering OAuth token caching, invoicing and disputes.
@@ -132,7 +142,7 @@ If we're ahead of schedule in week 3, propose **one** stretch item and let me ch
 - Keep token usage lean: send summaries, not raw data dumps. I've set a spend limit in the Anthropic Console.
 
 **Frontend: React (Vite).**
-- Ask me whether to use JavaScript or TypeScript. I know basic React, so readability matters.
+- **Decided (22 Oct): JavaScript.** I know basic React, so readability matters.
 - Use **AG Grid Community** (MIT).
 
 **APIMatic.**
@@ -141,7 +151,7 @@ If we're ahead of schedule in week 3, propose **one** stretch item and let me ch
 - Log in `docs/APIMATIC.md` how it helped. That becomes the README section for the APIMatic judges.
 
 **Hosting: Render, via a `render.yaml` blueprint.**
-- Recommend whether Django should serve the built React app or whether it should be a separate Render static site, and explain why.
+- **Decided (22 Oct): Django serves the built React app itself**, so there is one Render web service and one URL.
 - **Database plan:** Render's free Postgres expires 30 days after creation, plus a 14-day grace period, and judging runs 1–15 Dec. To handle this:
   - Use SQLite locally.
   - **Seed the demo data automatically on startup**, so the demo survives a database reset.
