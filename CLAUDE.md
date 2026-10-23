@@ -11,6 +11,7 @@ Decisions Saad has made. These override any open question further down this brie
 | Thu 22 Oct 2026 | Backend framework | **Django + Django REST Framework** (not FastAPI) |
 | Thu 22 Oct 2026 | Frontend language | **JavaScript** (not TypeScript) |
 | Thu 22 Oct 2026 | Serving the React build | **Django serves the built React app itself** (one Render web service, not a separate static site) |
+| Fri 23 Oct 2026 | Project name and personality | **Receipts** (see section 6) |
 
 ---
 
@@ -162,13 +163,20 @@ If we're ahead of schedule in week 3, propose **one** stretch item and let me ch
 
 ## 6. Personality: make it memorable (cheap, high impact)
 
-The project needs a **distinct personality** so it stands out from generic "AI payment dashboards". **Pitch me 3 options (name, tone and visual identity) and let me choose.** A starting idea:
+The project needs a **distinct personality** so it stands out from generic "AI payment dashboards".
 
-- **"Paper Trail":** the agent is the freelancer's calm, sharp-eyed case clerk. It's precise, loyal and slightly dry-witted ("Filed. Ahmed's claim doesn't match the paper trail."). It's never panicky and never salesy.
-- **Visual language** that suits my art background:
-  - a "case file" look with manila-folder tones,
-  - ink-stamp status badges: PAID, DISPUTED, DEFENDED, WON,
-  - typewriter-style accent fonts on a clean modern UI.
+**Decided (23 Oct): "Receipts".** Tagline: *"You did the work. We keep the receipts."* (Paper Trail and Exhibit A were the other two options.)
+
+- **Voice:** a brisk, upbeat friend who always kept the receipts. Short sentences, plain words, never panicky, never salesy, never silly.
+  - Empty state: "No receipts yet. Send your first invoice and I'll start keeping them."
+  - Loading: "Checking the receipts…"
+  - Dispute found: "Ahmed says the logo pack never arrived. Good news: we've got receipts. Delivered 14 Oct, 16:02. Draft's ready, so give it a look before I send."
+- **Visual language:** a thermal-receipt look on a clean modern UI.
+  - Colours: receipt off-white `#FAF9F4`, ink `#111111`, highlighter yellow `#F2E35B`, alert red `#B3261E`, faded ink `#595959`.
+  - Fonts: **Space Grotesk** (headings and body), **Space Mono** (badges, amounts, IDs).
+  - Dashed "perforated" dividers; the highlighter marks what needs attention.
+  - Status chips: SENT (dashed grey), PAID ✓ (outlined), DISPUTED (red), YOUR OK NEEDED (highlighter), DEFENDED (bold outline), \*\*\* WON \*\*\* (yellow on black).
+  - The mock-ups live on the "Personality Options" design canvas.
 - The personality lives in the UI: empty states, loading messages and agent chat. **The evidence text sent to PayPal stays strictly professional.**
 
 The design must be accessible (good contrast, keyboard navigation) and responsive. I'll lead on visual design. You implement it cleanly.
