@@ -1,0 +1,2 @@
+# APIMatic-generated PayPal Server SDK (Transaction Search). Not on PyPI: installed from its GitHub repo.
+paypal @ git+https://github.com/context-plugins/paypal-python-sdk.git@main

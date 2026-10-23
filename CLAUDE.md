@@ -12,6 +12,7 @@ Decisions Saad has made. These override any open question further down this brie
 | Thu 22 Oct 2026 | Frontend language | **JavaScript** (not TypeScript) |
 | Thu 22 Oct 2026 | Serving the React build | **Django serves the built React app itself** (one Render web service, not a separate static site) |
 | Fri 23 Oct 2026 | Project name and personality | **Receipts** (see section 6) |
+| Fri 23 Oct 2026 | How we use APIMatic | **Option 1:** APIMatic's generated PayPal Python SDK powers **Transaction Search**, PayPal's own payment record, used as dispute evidence. Invoicing and Disputes (not in that SDK) are hand-written following the same patterns. Plan and contract sheet: `paypal-plan.md`. |
 
 ---
 
@@ -149,6 +150,7 @@ If we're ahead of schedule in week 3, propose **one** stretch item and let me ch
 **APIMatic.**
 - Set up the APIMatic Context Plugin for PayPal in this Claude Code session in week 1. Check APIMatic's hackathon docs for the install steps, and ask me to do any account steps.
 - Use it when writing the PayPal integration.
+- **Decided (23 Oct):** the plugin's SDK covers Orders, Payments, Subscriptions, Transaction Search and Vault, but **not** Invoicing or Disputes. We use the SDK for Transaction Search (evidence of payment). See the Decisions log and `paypal-plan.md`.
 - Log in `docs/APIMATIC.md` how it helped. That becomes the README section for the APIMatic judges.
 
 **Hosting: Render, via a `render.yaml` blueprint.**
