@@ -34,6 +34,18 @@ One short entry per file or concept, in plain English, so I can explain every pa
 **Why:** A judge cloning the repo copies it to `.env` and fills in their own keys. It documents the settings without exposing mine.
 **Connects to:** The Django settings file (Saturday) reads these values with `os.environ`. The PayPal wrapper uses the `PAYPAL_*` values, and the AI agent uses the `ANTHROPIC_*` values.
 
+### `requirements.txt` (added Fri 23 Oct)
+**What:** The list of Python packages the app needs. `pip install -r requirements.txt` installs them all.
+**So far:** Only APIMatic's PayPal SDK. Its line looks unusual (`paypal @ git+https://…`) because that package isn't published on PyPI, so pip installs it straight from its GitHub repo. Django and the other packages get added on Saturday.
+
+### `paypal-plan.md` (added Fri 23 Oct)
+**What:** The plan and "contract sheet" for using APIMatic's SDK for Transaction Search. Every fact in it (function signature, date format, error type, which fields may be missing) was looked up in the SDK's own map and source, not remembered.
+**Why:** The APIMatic plugin's workflow requires it before any SDK code is written, and it's the evidence for the APIMatic prize that we used the tool properly.
+**Connects to:** `paypal_client/` (Saturday onwards) and the dispute agent (Week 2).
+
+### `docs/APIMATIC.md` (added Fri 23 Oct)
+**What:** A dated log of how APIMatic helped. It becomes the README's APIMatic section for the judges.
+
 ---
 
 ## Concepts
@@ -64,4 +76,19 @@ They have different credentials. This project only ever uses the sandbox. In it,
 - retries and testing
 
 The SDK itself covers 5 areas: **Orders, Payments, Vault, Subscriptions and Transaction Search**.
-**Important finding:** That SDK does **not** include the **Invoicing** or **Disputes** APIs, which are the two our core loop depends on. The general patterns (OAuth, error handling, retries) still apply to our own `paypal_client` code. Exactly how we use APIMatic "meaningfully" for the prize is an open decision.
+**Important finding:** That SDK does **not** include the **Invoicing** or **Disputes** APIs, which are the two our core loop depends on. The general patterns (OAuth, error handling, retries) still apply to our own `paypal_client` code. **Decided (23 Oct):** we use the SDK's **Transaction Search** so the agent can cite PayPal's own record of the payment.
+
+### Transaction Search, and why it's good evidence
+Transaction Search is PayPal's history of every payment on an account. When a client disputes an invoice, the strongest neutral fact is PayPal's own record:
+- **who paid** (`payer_info.email_address`)
+- **how much** (`transaction_amount`)
+- **when** (`transaction_initiation_date`)
+- **which PayPal invoice it was for** (`cart_info.paypal_invoice_id`)
+
+Our own delivery records prove the work was done. Transaction Search proves the payment matches the invoice. Together they make a stronger case.
+
+### SDK (Software Development Kit)
+A ready-made library for calling an API. Instead of building the HTTP request yourself (URL, headers, JSON), you call a Python function like `client.transaction_search.search_transactions(...)` and get typed Python objects back. APIMatic generates SDKs automatically from an API's specification.
+
+### `UNSET` vs `None`
+In this SDK, a field PayPal didn't send is `UNSET` (a special marker), **not** `None`. So the check is `if x is UNSET`, and `if x is None` would never be true.
