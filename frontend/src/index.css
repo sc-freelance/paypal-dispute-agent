@@ -1,0 +1,144 @@
+/* Receipts design tokens: the colours and fonts from CLAUDE.md §6, defined once and reused everywhere. */
+:root {
+  --paper: #FAF9F4;      /* receipt off-white: page background */
+  --card: #FFFFFF;
+  --ink: #111111;        /* main text */
+  --faded: #595959;      /* secondary text */
+  --highlight: #F2E35B;  /* highlighter yellow: "needs your attention" */
+  --alert: #B3261E;      /* disputes and errors */
+  --font-body: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+/* Visible focus ring for keyboard users (accessibility) */
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 16px 64px;
+}
+
+.masthead {
+  border-bottom: 2px dashed var(--ink);  /* the "perforated" receipt edge */
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--faded);
+  margin: 0 0 8px;
+}
+
+.wordmark {
+  margin: 0;
+  font-size: clamp(56px, 12vw, 96px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.mark {
+  background: var(--highlight);
+  padding: 0 4px;
+}
+
+.tagline {
+  margin: 12px 0 0;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.receipt {
+  background: var(--card);
+  border: 1px solid var(--ink);
+  padding: 20px 24px;
+}
+
+.receipt h2 {
+  margin: 0 0 12px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+.empty {
+  margin: 0;
+  font-size: 20px;
+}
+
+.lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lines li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px dashed #8C8C8C;
+}
+
+.lines li:first-child {
+  border-top: none;
+}
+
+/* Status chips: the receipt-style badges */
+.chip {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border: 1px solid var(--ink);
+  white-space: nowrap;
+}
+
+.chip-ok {
+  background: var(--card);
+}
+
+.chip-attention {
+  background: var(--highlight);
+}
+
+.chip-alert {
+  background: var(--alert);
+  border-color: var(--alert);
+  color: #FFFFFF;
+}
+
+.footnote {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--faded);
+  margin-top: 32px;
+}
