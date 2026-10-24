@@ -1,2 +1,15 @@
+# Web framework and its REST API toolkit
+Django==5.2.18
+djangorestframework==3.18.3
+
+# Reads the .env file into environment variables
+python-dotenv==1.2.4
+
+# Serves static files (the built React app) straight from Django
+whitenoise==6.12.0
+
+# Production web server Render runs Django with
+gunicorn==26.2.0
+
 # APIMatic-generated PayPal Server SDK (Transaction Search). Not on PyPI: installed from its GitHub repo.
 paypal @ git+https://github.com/context-plugins/paypal-python-sdk.git@main
