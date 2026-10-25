@@ -1,30 +1,30 @@
-import { useEffect, useState } from 'react'
-
-// One line on the "System check" receipt: a label on the left, a status chip on the right.
-function StatusLine({ label, ok, okText = 'READY', badText = 'MISSING' }) {
-  return (
-    <li>
-      <span>{label}</span>
-      <span className={`chip ${ok ? 'chip-ok' : 'chip-attention'}`}>{ok ? `${okText} ✓` : badText}</span>
-    </li>
-  )
-}
+import { useCallback, useEffect, useState } from 'react'
+import { getHealth, getInvoices } from './api'
+import Chat from './components/Chat'
+import InvoiceList from './components/InvoiceList'
 
 export default function App() {
-  // health = the JSON from GET /api/health/. null while loading; error holds a message if the call fails.
+  const [invoices, setInvoices] = useState([])
   const [health, setHealth] = useState(null)
-  const [error, setError] = useState(null)
+  const [loadError, setLoadError] = useState(null)
 
-  // Runs once when the page loads: ask Django whether the backend is up.
-  useEffect(() => {
-    fetch('/api/health/')
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.json()
+  // Reload invoices from the server. Passed down so the chat and the list can ask for a refresh.
+  const refreshInvoices = useCallback(() => {
+    getInvoices()
+      .then((data) => {
+        setInvoices(data)
+        setLoadError(null)
       })
-      .then(setHealth)
-      .catch((err) => setError(err.message))
+      .catch((err) => setLoadError(err.message))
   }, [])
+
+  // On page load: fetch invoices and the system check once.
+  useEffect(() => {
+    refreshInvoices()
+    getHealth().then(setHealth).catch(() => setHealth(null))
+  }, [refreshInvoices])
+
+  const waiting = invoices.filter((i) => i.status === 'NEEDS_APPROVAL').length
 
   return (
     <main className="page">
@@ -39,34 +39,26 @@ export default function App() {
       </header>
 
       <div className="grid">
-        <section className="receipt" aria-labelledby="invoices-heading">
-          <h2 id="invoices-heading">YOUR INVOICES</h2>
-          <p className="empty">No receipts yet. Send your first invoice and I'll start keeping them.</p>
+        <section className="receipt" aria-labelledby="chat-heading">
+          <h2 id="chat-heading">ASK RECEIPTS</h2>
+          <Chat onInvoicesChanged={refreshInvoices} />
         </section>
 
-        <section className="receipt" aria-labelledby="system-heading" aria-live="polite">
-          <h2 id="system-heading">SYSTEM CHECK</h2>
-          {error && (
-            <p>
-              <span className="chip chip-alert">BACKEND DOWN</span> Couldn't reach the API ({error}).
-            </p>
-          )}
-          {!error && !health && <p>Checking the receipts…</p>}
-          {health && (
-            <ul className="lines">
-              <StatusLine label="Django backend" ok={health.status === 'ok'} okText="UP" />
-              <StatusLine label="PayPal sandbox keys" ok={health.paypal_configured} />
-              <StatusLine label="Anthropic key" ok={health.anthropic_configured} />
-              <li>
-                <span>AI model</span>
-                <span className="chip chip-ok">{health.model || 'NOT SET'}</span>
-              </li>
-            </ul>
+        <section className="receipt" aria-labelledby="invoices-heading">
+          <h2 id="invoices-heading">
+            YOUR INVOICES {waiting > 0 && <span className="chip chip-attention">{waiting} NEED YOUR OK</span>}
+          </h2>
+          {loadError ? <p className="error" role="alert">Couldn't load invoices ({loadError}).</p> : (
+            <InvoiceList invoices={invoices} onChanged={refreshInvoices} />
           )}
         </section>
       </div>
 
-      <p className="footnote">Skeleton build · Week 1 · sandbox only</p>
+      <p className="footnote">
+        {health
+          ? `Backend up · PayPal keys ${health.paypal_configured ? 'set' : 'MISSING'} · AI ${health.model || 'not set'} · sandbox only`
+          : 'Checking the backend…'}
+      </p>
     </main>
   )
 }

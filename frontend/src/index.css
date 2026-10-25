@@ -136,6 +136,154 @@ body {
   color: #FFFFFF;
 }
 
+.chip-dashed {
+  border-style: dashed;
+  border-color: var(--faded);
+  color: var(--faded);
+  background: var(--card);
+}
+
+.chip-faded {
+  border-color: #8C8C8C;
+  color: var(--faded);
+  text-decoration: line-through;
+}
+
+/* Wordmark highlight: a highlighter stroke behind the dot, not a tall block */
+.wordmark .mark {
+  padding: 0 2px;
+  background: linear-gradient(transparent 55%, var(--highlight) 55%);
+}
+
+.receipt h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mono { font-family: var(--font-mono); }
+.faded { color: var(--faded); }
+.small { font-size: 13px; }
+
+.error {
+  color: var(--alert);
+  font-weight: 700;
+  margin: 8px 0 0;
+}
+
+/* Screen-reader-only text: read aloud, not shown */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Buttons */
+.btn {
+  font: 700 15px var(--font-body);
+  min-height: 44px; /* big enough to tap on a phone */
+  padding: 8px 16px;
+  border: 1px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) { background: var(--paper); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-primary { background: var(--ink); color: var(--highlight); }
+.btn-primary:hover:not(:disabled) { background: #333333; }
+
+/* Chat */
+.chat { display: flex; flex-direction: column; gap: 12px; }
+
+.chat-log {
+  min-height: 260px;
+  max-height: 460px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bubble {
+  padding: 10px 14px;
+  max-width: 90%;
+}
+
+.bubble p { margin: 0; }
+
+.bubble-user {
+  align-self: flex-end;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.bubble-assistant {
+  align-self: flex-start;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+}
+
+.tool-lines {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px dashed #8C8C8C;
+  font-size: 14px;
+  color: var(--faded);
+}
+
+.tool-error { color: var(--alert); }
+
+.chat-form { display: flex; gap: 8px; }
+
+.chat-form input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 12px;
+  font: 16px var(--font-body);
+  border: 1px solid var(--ink);
+  background: var(--card);
+}
+
+/* Invoice list */
+.invoices { list-style: none; margin: 0; padding: 0; }
+
+.invoice {
+  padding: 14px 0;
+  border-top: 1px dashed #8C8C8C;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.invoice:first-child { border-top: none; padding-top: 0; }
+
+.invoice-attention {
+  background: #FDF9DD;
+  margin: 0 -12px;
+  padding: 14px 12px;
+}
+
+.invoice-top,
+.invoice-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.amount { font-size: 20px; font-weight: 700; }
+
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+
 .footnote {
   font-family: var(--font-mono);
   font-size: 13px;
