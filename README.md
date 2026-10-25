@@ -4,7 +4,9 @@
 
 Receipts is an AI agent that helps freelancers **keep the money they've earned** by defending PayPal disputes with real evidence. It's built for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/) with PayPal's sandbox APIs and Anthropic's Claude.
 
-> **Status (25 Oct 2026):** Week 1 complete. Chat-to-invoice with human approval works against the real PayPal sandbox. The dispute-defence agent is in progress (Week 2). See [Roadmap](#roadmap).
+**Live demo: [receipts-zh30.onrender.com](https://receipts-zh30.onrender.com)** (free hosting: the first load after a quiet spell can take about a minute)
+
+> **Status (25 Oct 2026):** Week 1 complete. Chat-to-invoice with human approval works against the real PayPal sandbox and is deployed on Render. The dispute-defence agent is in progress (Week 2). See [Roadmap](#roadmap).
 
 ---
 
