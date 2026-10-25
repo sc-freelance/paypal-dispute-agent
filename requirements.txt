@@ -11,5 +11,11 @@ whitenoise==6.12.0
 # Production web server Render runs Django with
 gunicorn==26.2.0
 
+# HTTP calls to PayPal's REST API (Invoicing, Disputes)
+requests==2.34.2
+
+# Claude API (the AI agent)
+anthropic==2.3.0
+
 # APIMatic-generated PayPal Server SDK (Transaction Search). Not on PyPI: installed from its GitHub repo.
 paypal @ git+https://github.com/context-plugins/paypal-python-sdk.git@main
