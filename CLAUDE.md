@@ -13,6 +13,9 @@ Decisions Saad has made. These override any open question further down this brie
 | Thu 22 Oct 2026 | Serving the React build | **Django serves the built React app itself** (one Render web service, not a separate static site) |
 | Fri 23 Oct 2026 | Project name and personality | **Receipts** (see section 6) |
 | Fri 23 Oct 2026 | How we use APIMatic | **Option 1:** APIMatic's generated PayPal Python SDK powers **Transaction Search**, PayPal's own payment record, used as dispute evidence. Invoicing and Disputes (not in that SDK) are hand-written following the same patterns. Plan and contract sheet: `paypal-plan.md`. |
+| Sun 25 Oct 2026 | Schedule | **Transaction Search moves to Week 2** (it's only needed once a dispute exists). |
+| Sun 25 Oct 2026 | Testing PayPal | Claude's workspace can't reach PayPal, so **PayPal calls are tested on Saad's computer**: Claude pushes, Saad pulls and runs `python manage.py paypal_check` (or the app) and pastes the output. |
+| Sun 25 Oct 2026 | Approval design | The agent can only **draft** invoices in our database. The PayPal draft is created and sent only when Saad clicks **Approve** (`POST /api/invoices/<id>/approve/`). No agent tool can send or move money. |
 
 ---
 

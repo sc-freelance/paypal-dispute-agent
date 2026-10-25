@@ -158,6 +158,99 @@ A migration is a saved instruction for changing the database ("create the invoic
 
 ---
 
+## Sun 25 Oct: chat → invoice → approve
+
+### `paypal_client/auth.py`
+- **`get_access_token()`** swaps the Client ID and Secret for an OAuth access token (`POST /v1/oauth2/token`) and **caches** it in memory until a minute before it expires. A `threading.Lock` stops two requests fetching a token at once.
+- **`paypal_request()`** is the one helper every PayPal call goes through.
+  - It adds the `Authorization: Bearer …` header.
+  - If PayPal answers 401, it refreshes the token and retries once.
+  - Any failure becomes a **`PayPalError`** that keeps PayPal's `name`, `message` and `debug_id`.
+- **Network problems** (no internet, blocked, timeout) become `PayPalError("NETWORK_ERROR")` instead of a long crash message.
+- **Safety net:** it refuses any `PAYPAL_BASE_URL` that isn't the sandbox, so real money can never be touched.
+
+### `paypal_client/invoices.py`
+Wraps PayPal's **Invoicing API v2**, with endpoints checked against PayPal's official reference:
+- `create_draft_invoice` → `POST /v2/invoicing/invoices`, with the header `Prefer: return=representation` so PayPal sends back the whole invoice, including its `id`.
+- `send_invoice` → `POST /v2/invoicing/invoices/{id}/send`, which emails the client.
+- `get_invoice` → `GET /v2/invoicing/invoices/{id}`
+- `list_invoices` → `GET /v2/invoicing/invoices` (page size 1–100)
+- `summarise` shrinks an invoice to six fields, so the AI isn't sent huge JSON.
+
+### `invoices/management/commands/paypal_check.py`
+A custom `manage.py` command that tests the PayPal connection on your computer: sign in, list invoices, and with `--draft`, create a £1 draft. Django finds it because it sits in an app's `management/commands/` folder. It never prints keys.
+
+### `invoices/models.py`
+The **`Invoice`** table: client, description, amount, currency, our `status`, plus PayPal's `paypal_id` and `paypal_status` once sent, and `last_error`.
+- `Status` is a **`TextChoices`** list: NEEDS_APPROVAL → SENDING → SENT → PAID, or REJECTED.
+- Money uses **`DecimalField`**, not float, because floats can't store 0.10 exactly.
+
+### `invoices/serializers.py`
+A DRF **serializer** converts an `Invoice` to JSON for React. The status fields are read-only, so nothing can change them except the approve and reject endpoints.
+
+### `invoices/views.py` and `invoices/urls.py`
+- `GET /api/invoices/` lists invoices.
+- **`POST /api/invoices/<id>/approve/` is the only code that writes to PayPal:**
+  1. **Claims** the invoice with one database UPDATE that only succeeds if its status is still NEEDS_APPROVAL. A double-click therefore gets "409 Conflict" instead of sending twice.
+  2. Creates the PayPal draft, unless an earlier attempt already did.
+  3. Sends it, then reads back PayPal's status.
+  4. If PayPal fails, puts the invoice back to NEEDS_APPROVAL with the error, so you can retry.
+- `POST /api/invoices/<id>/reject/` marks the draft REJECTED.
+
+### `agent/prompts/invoice_agent_v1.md`
+The agent's **system prompt**: the Receipts voice, what the tools do, and the rules. It never claims to have sent anything, never guesses missing details, and always mentions the Approve step. It's versioned (`_v1`), so we can improve it without losing the old one.
+
+### `agent/tools.py`
+The agent's three tools. Each has a **JSON schema** (sent to Claude so it knows the tool exists) and a **Python handler** (the code that runs it):
+- `draft_invoice` saves a NEEDS_APPROVAL invoice in our database only.
+- `list_invoices` reads our invoices, giving a short summary rather than a data dump.
+- `list_paypal_invoices` reads PayPal's copy through `paypal_client`, read-only.
+
+There is deliberately **no** send tool, and a test checks that.
+
+### `agent/service.py`
+**The tool-calling loop:**
+1. Send Claude the conversation, the system prompt and the tool schemas.
+2. If `stop_reason == "tool_use"`, run each requested tool, save it as a `ToolCall`, and send back a `tool_result`.
+3. Repeat until Claude writes its text answer.
+
+`MAX_STEPS = 5` stops runaway loops. The model name comes from `ANTHROPIC_MODEL`.
+
+### `agent/models.py`
+The **`ToolCall`** table logs every action the agent takes (tool, input, result, success or failure), grouped by `run_id`. It powers the "✓ Drafted invoice #0002" lines in the chat.
+
+### `agent/views.py`
+`POST /api/agent/chat/` receives the chat history from React, keeps only the last 20 messages (to keep costs down), runs the agent and returns `{reply, tool_calls}`.
+
+### `*/admin.py`
+Registers `Invoice` and `ToolCall` with Django's admin site at `/admin/`, a quick way to look at the data while building.
+
+### Tests: `invoices/tests.py`, `agent/tests.py`, `paypal_client/tests.py`
+13 tests, run with `python manage.py test`. PayPal is replaced by **mocks** (`unittest.mock.patch`): fakes that return set answers, so no network is used. They prove that:
+- approve sends exactly once, and a second approve is refused
+- PayPal failures can be retried
+- no tool can send money
+- tokens are cached, network errors are caught, and live PayPal is refused
+
+### Frontend: `src/api.js`, `src/components/`
+- **`api.js`** is one place for every call to Django, using `fetch`. It turns error responses into readable messages.
+- **`Chat.jsx`** keeps the messages in state. It sends the conversation to `/api/agent/chat/` and shows the reply with "what I did" lines underneath. It has a screen-reader label on the input and "Checking the receipts…" while waiting.
+- **`InvoiceList.jsx`** shows each invoice with its status chip and amount. Drafts get the **Approve & send via PayPal** and **Reject** buttons. It always reloads from the server afterwards, so the screen matches the database.
+- **`StatusChip.jsx`** maps each status to its receipt-style badge (YOUR OK NEEDED, SENT, PAID ✓ …).
+- **`App.jsx`** is the page layout. It loads invoices on start and passes `refreshInvoices` down, so the chat and list can trigger a reload. **Passing a function down as a prop** like this is the usual React way for child components to talk to the parent.
+
+### `render.yaml` and `.python-version`
+- **`render.yaml`** is a **Blueprint**: Render's settings as code. It defines one free web service, built with `./build.sh` and started with `migrate && gunicorn`, with `/api/health/` as the health check.
+  - Non-secret settings are written in the file.
+  - Secrets are marked `sync: false`, which means "ask me in the dashboard".
+  - `DJANGO_SECRET_KEY` is generated by Render.
+- **`.python-version`** pins Python 3.13, so Render matches your computer.
+
+### Concept: human-in-the-loop
+The AI **proposes** (a draft) and the human **disposes** (Approve or Reject). The rule is enforced in code, not just in the prompt: the agent has no tool that can send, and the approve endpoint is a button only you can press. This is a core point of the pitch.
+
+---
+
 ## Concepts
 
 ### Environment variables and secrets
