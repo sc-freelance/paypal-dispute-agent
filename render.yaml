@@ -1,0 +1,33 @@
+# Render Blueprint: tells Render how to build and run Receipts.
+# In the Render dashboard: New → Blueprint → pick this GitHub repo. Render reads this file.
+# Field names checked against Render's Blueprint YAML reference (render.com/docs/yaml-spec).
+services:
+  - type: web
+    name: receipts
+    runtime: python
+    plan: free  # sleeps after 15 minutes without visitors; the first load after that takes about a minute
+    buildCommand: ./build.sh
+    # Migrate again at start-up: on the free plan the disk resets whenever the service restarts.
+    startCommand: python manage.py migrate --no-input && gunicorn config.wsgi:application
+    healthCheckPath: /api/health/
+    autoDeployTrigger: commit  # every push to GitHub redeploys
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true  # Render makes a random one; it never appears in the repo
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DEMO_MODE
+        value: "True"
+      - key: PAYPAL_BASE_URL
+        value: https://api-m.sandbox.paypal.com
+      - key: ANTHROPIC_MODEL
+        value: claude-haiku-5-5  # switch to claude-sonnet-5-5 for the final demo
+      # Secrets: Render asks you to paste these when you first create the Blueprint.
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_SANDBOX_CLIENT_EMAIL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
