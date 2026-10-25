@@ -16,8 +16,14 @@ One short entry per file or concept, in plain English, so I can explain every pa
 **Why:** The hackathon requires a public repo with an open-source licence visible in GitHub's About section. GitHub shows it there automatically because the file is called `LICENSE`.
 
 ### `README.md`
-**What:** Currently just the title. It will become the front page judges read: the problem, features, architecture diagram, setup steps, the PayPal APIs and AI tools used, and the AG Grid and APIMatic sections.
-**When:** Written properly in the final stretch (Mon 9 Nov), once the features are frozen.
+**What:** The front page judges read on GitHub. It covers:
+- the problem and the core loop
+- a feature status table (Done, In progress, Planned)
+- the tech stack and an architecture diagram
+- the PayPal APIs used, and how Claude and APIMatic were used
+- setup steps, Render deploy steps and the project structure
+
+**First full version:** Sun 25 Oct. The diagram is written in **Mermaid**, a text format that GitHub draws as a picture. The status table gets updated as features land, and the final polish comes on Mon 9 Nov.
 
 ### `.gitignore` (added Fri 23 Oct)
 **What:** A list of files and folders git should never track.
