@@ -16,6 +16,7 @@ Decisions Saad has made. These override any open question further down this brie
 | Sun 25 Oct 2026 | Schedule | **Transaction Search moves to Week 2** (it's only needed once a dispute exists). |
 | Sun 25 Oct 2026 | Testing PayPal | Claude's workspace can't reach PayPal, so **PayPal calls are tested on Saad's computer**: Claude pushes, Saad pulls and runs `python manage.py paypal_check` (or the app) and pastes the output. |
 | Sun 25 Oct 2026 | Approval design | The agent can only **draft** invoices in our database. The PayPal draft is created and sent only when Saad clicks **Approve** (`POST /api/invoices/<id>/approve/`). No agent tool can send or move money. |
+| Wed 28 Oct 2026 | Build order | **UI first:** build all screens (dispute screens, review screen, AG Grid dashboard, insights, demo mode, polish) with sample data, then wire up the dispute backend. Known risk, accepted: screens may need adjusting once real dispute data arrives, and the core loop lands later. |
 
 ---
 
