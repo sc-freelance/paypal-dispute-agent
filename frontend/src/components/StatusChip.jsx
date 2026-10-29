@@ -5,6 +5,10 @@ const CHIPS = {
   SENT: { text: 'SENT', className: 'chip chip-dashed' },
   PAID: { text: 'PAID ✓', className: 'chip chip-ok' },
   REJECTED: { text: 'REJECTED', className: 'chip chip-faded' },
+  // Dispute statuses
+  DISPUTED: { text: 'DISPUTED', className: 'chip chip-alert' },
+  DEFENDED: { text: 'DEFENDED', className: 'chip chip-bold' },
+  WON: { text: '*** WON ***', className: 'chip chip-won' },
 }
 
 export default function StatusChip({ status }) {
