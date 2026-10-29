@@ -1,16 +1,31 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getHealth, getInvoices } from './api'
-import Chat from './components/Chat'
-import InvoiceList from './components/InvoiceList'
+import ChatDrawer from './components/ChatDrawer'
+import DemoStrip from './components/DemoStrip'
+import Header from './components/Header'
+import { SAMPLE_DISPUTES } from './data/sampleData'
+import { TABS } from './lib/tabs'
+import DashboardPage from './pages/DashboardPage'
+import DisputesPage from './pages/DisputesPage'
+import InvoicesPage from './pages/InvoicesPage'
+
+// Which tab is showing comes from the URL hash (#dashboard, #disputes, #invoices),
+// so the browser's back button and bookmarks work without a routing library.
+function tabFromHash() {
+  const id = window.location.hash.replace('#', '')
+  return TABS.some((t) => t.id === id) ? id : 'dashboard'
+}
 
 export default function App() {
+  const [tab, setTab] = useState(tabFromHash)
   const [invoices, setInvoices] = useState([])
-  const [health, setHealth] = useState(null)
   const [loadError, setLoadError] = useState(null)
+  const [health, setHealth] = useState(null)
+  const [syncing, setSyncing] = useState(false)
+  const disputes = SAMPLE_DISPUTES // sample data until the dispute backend exists
 
-  // Reload invoices from the server. Passed down so the chat and the list can ask for a refresh.
   const refreshInvoices = useCallback(() => {
-    getInvoices()
+    return getInvoices()
       .then((data) => {
         setInvoices(data)
         setLoadError(null)
@@ -18,47 +33,36 @@ export default function App() {
       .catch((err) => setLoadError(err.message))
   }, [])
 
-  // On page load: fetch invoices and the system check once.
   useEffect(() => {
     refreshInvoices()
     getHealth().then(setHealth).catch(() => setHealth(null))
+    const onHash = () => setTab(tabFromHash())
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
   }, [refreshInvoices])
 
-  const waiting = invoices.filter((i) => i.status === 'NEEDS_APPROVAL').length
+  // "Sync with PayPal": for now this reloads invoices; disputes join in once their backend exists.
+  async function handleSync() {
+    setSyncing(true)
+    await refreshInvoices()
+    setSyncing(false)
+  }
+
+  const counts = {
+    disputes: disputes.filter((d) => d.stage === 'NEEDS_OK').length,
+    invoices: invoices.filter((i) => i.status === 'NEEDS_APPROVAL').length,
+  }
 
   return (
-    <main className="page">
-      <header className="masthead">
-        <p className="meta">FREELANCE DISPUTE DEFENCE · POWERED BY PAYPAL + CLAUDE</p>
-        <h1 className="wordmark">
-          Receipts<span className="mark">.</span>
-        </h1>
-        <p className="tagline">
-          You did the work. <span className="mark">We keep the receipts.</span>
-        </p>
-      </header>
-
-      <div className="grid">
-        <section className="receipt" aria-labelledby="chat-heading">
-          <h2 id="chat-heading">ASK RECEIPTS</h2>
-          <Chat onInvoicesChanged={refreshInvoices} />
-        </section>
-
-        <section className="receipt" aria-labelledby="invoices-heading">
-          <h2 id="invoices-heading">
-            YOUR INVOICES {waiting > 0 && <span className="chip chip-attention">{waiting} NEED YOUR OK</span>}
-          </h2>
-          {loadError ? <p className="error" role="alert">Couldn't load invoices ({loadError}).</p> : (
-            <InvoiceList invoices={invoices} onChanged={refreshInvoices} />
-          )}
-        </section>
-      </div>
-
-      <p className="footnote">
-        {health
-          ? `Backend up · PayPal keys ${health.paypal_configured ? 'set' : 'MISSING'} · AI ${health.model || 'not set'} · sandbox only`
-          : 'Checking the backend…'}
-      </p>
-    </main>
+    <>
+      {health?.demo_mode && <DemoStrip />}
+      <Header activeTab={tab} onTabChange={setTab} counts={counts} onSync={handleSync} syncing={syncing} />
+      <main className="page">
+        {tab === 'dashboard' && <DashboardPage invoices={invoices} disputes={disputes} />}
+        {tab === 'disputes' && <DisputesPage disputes={disputes} />}
+        {tab === 'invoices' && <InvoicesPage invoices={invoices} loadError={loadError} onChanged={refreshInvoices} />}
+      </main>
+      <ChatDrawer onInvoicesChanged={refreshInvoices} />
+    </>
   )
 }
