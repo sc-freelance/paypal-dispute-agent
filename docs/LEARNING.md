@@ -272,6 +272,64 @@ Anything still uncertain is marked **TO CONFIRM**.
 ### Concept: HATEOAS
 A fancy name for a simple idea: the API's response includes **links to what you can do next**. A dispute waiting for us might list `provide_evidence` and `accept_claim`. Once it's resolved, those links disappear. The app follows the links, so it never offers a button PayPal would reject.
 
+---
+
+## Thu 29 Oct: layout, AG Grid dashboard, disputes board, chat drawer
+
+### `frontend/src/App.jsx` (rewritten)
+The app shell: the demo strip (in demo mode only), then the header, the current tab's page, and the chat drawer.
+- **Which tab shows comes from the URL hash** (`#dashboard`, `#disputes`, `#invoices`). Listening for `hashchange` means the browser's Back button works, with no routing library needed.
+- It loads invoices and health once, and passes `refreshInvoices` down to the pages and the chat.
+
+### `src/lib/tabs.js`, `src/components/Header.jsx`, `src/components/DemoStrip.jsx`
+- **`tabs.js`:** the list of tabs.
+- **`Header.jsx`:** the wordmark, the tab links (with red counter badges and `aria-current` for screen readers), and **Sync with PayPal**. For now, Sync reloads invoices.
+- **`DemoStrip.jsx`:** the yellow demo-mode strip. Reset stays disabled until `seed_demo` exists.
+
+### `src/data/sampleData.js`
+Fictional invoices and disputes, used because we're building the UI first. Every sample is marked `sample: true`, and the grid shows a `sample` tag on those rows. Real disputes will replace them once the backend exists.
+
+### `src/lib/deadline.js` and `src/components/DeadlineChip.jsx`
+`daysUntil()` counts calendar days to a date. `deadline()` turns that into text ("6 days left", "4 days overdue") plus a **tone**: calm (grey) over 7 days, attention (highlighter) at 7 or under, alert (red) at 3 or under. The text always carries the number, so colour is never the only signal.
+
+### `src/lib/dashboardRows.js`
+- **`buildRows()`** combines real invoices, sample invoices and sample disputes into **one row shape**, and adds three flags to each row: `needsOk`, `overdue` and `atRisk`.
+- **`QUICK_FILTERS`** lists each filter as a test function.
+- **`formatMoney()`** gives "£1,200.00".
+
+### `src/pages/DashboardPage.jsx`: AG Grid (the prize target)
+- **`ModuleRegistry.registerModules([AllCommunityModule])`** switches on AG Grid's free Community features (MIT licence).
+- **The Theming API:** `themeQuartz.withParams({...})` restyles the grid with our colours and fonts, without overriding AG Grid's CSS by hand.
+- **`columnDefs`** says what each column shows.
+  - `valueFormatter` turns `450` into "£450.00".
+  - `cellRenderer` swaps a plain cell for our own React component (the status and deadline chips).
+  - `comparator` sorts deadlines by real date.
+  - `filter: 'agTextColumnFilter'` adds a column filter.
+- **Conditional styling:**
+  - `rowClassRules` tints rows that need your OK.
+  - `cellClassRules` turns at-risk amounts red.
+- **Quick filters:** AG Grid's *external filter* hooks, `isExternalFilterPresent` and `doesExternalFilterPass`. Clicking a button calls `api.onFilterChanged()` to re-filter. They combine with the column filters.
+- **The pinned totals row:** `pinnedBottomRowData` is a row stuck to the bottom. `onModelUpdated` runs after every filter or sort, and `forEachNodeAfterFilter` adds up only the visible rows.
+- **`getRowId`:** a stable ID per row (the totals row included), so AG Grid can update rows without redrawing everything.
+- **AG Grid limit to know about:** **row grouping and aggregation are Enterprise-only (paid).** Everything above is Community, so it's free.
+
+### `src/components/InsightTiles.jsx`
+The four number tiles. They're calculated in the browser for now and move to a pandas-powered API in Week 3.
+
+### `src/pages/DisputesPage.jsx`
+The board: one column per stage (`NEEDS_OK`, `SUBMITTED`, `WON`), with each dispute as a receipt-stub card. Empty columns show a friendly line.
+
+### `src/components/ChatDrawer.jsx`
+The floating **Ask Receipts** button and the slide-out panel holding the existing `Chat`.
+- **It stays mounted when closed,** so the conversation survives. It's slid off-screen with CSS `transform` and marked **`inert`**, which means it can't be tabbed into while hidden.
+- **On open,** focus moves to the input, and Escape or a backdrop click closes it. On close, focus returns to the button. That's standard accessible-dialog behaviour.
+
+### `src/index.css` (additions)
+Styles for the demo strip, top bar and tabs, the deadline tones, the dashboard layout (it stacks on phones), the grid's row and cell classes, the board columns and cards, and the drawer. There's also a reduced-motion rule.
+
+### Concept: cell renderer
+A small component a data grid uses to draw one cell. AG Grid passes it `value`, `data` (the whole row) and `node` (with flags like `rowPinned`). That's how the status column shows a styled chip instead of the text "DISPUTED".
+
 ### Concept: human-in-the-loop
 The AI **proposes** (a draft) and the human **disposes** (Approve or Reject). The rule is enforced in code, not just in the prompt: the agent has no tool that can send, and the approve endpoint is a button only you can press. This is a core point of the pitch.
 
