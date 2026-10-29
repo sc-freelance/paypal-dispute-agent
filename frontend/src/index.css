@@ -32,9 +32,86 @@ body {
 }
 
 .page {
-  max-width: 960px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 48px 16px 64px;
+  padding: 24px 16px 96px; /* extra bottom space so the Ask Receipts button never covers content */
+}
+
+.page-narrow {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* ---- Layout: demo strip (12A) and top bar with tabs (1A) ---- */
+.demo-strip {
+  background: var(--highlight);
+  border-bottom: 1px solid var(--ink);
+  padding: 6px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.demo-reset {
+  font: 700 13px var(--font-mono);
+  background: var(--ink);
+  color: var(--highlight);
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.demo-reset:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.topbar {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px 16px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  border-bottom: 2px dashed var(--ink);
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.brand-dot { background: var(--highlight); padding: 0 2px; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 auto; }
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.tab:hover { background: var(--card); color: var(--ink); }
+
+.tab-active,
+.tab-active:hover { background: var(--ink); color: var(--highlight); }
+
+.tab-count {
+  font: 700 12px var(--font-mono);
+  background: var(--alert);
+  color: #FFFFFF;
+  padding: 2px 6px;
 }
 
 .masthead {
@@ -148,6 +225,193 @@ body {
   color: var(--faded);
   text-decoration: line-through;
 }
+
+.chip-bold { border-width: 2px; background: var(--card); }
+.chip-won { background: var(--ink); color: var(--highlight); }
+
+/* Deadline chips (4B): calm grey → highlighter (≤7 days) → red (≤3 days or overdue) */
+.deadline-calm { border-style: dashed; border-color: var(--faded); color: var(--faded); background: var(--card); }
+.deadline-attention { background: var(--highlight); }
+.deadline-alert { background: var(--alert); border-color: var(--alert); color: #FFFFFF; }
+
+/* ---- Dashboard (10B): grid on the left, insights on the right; stacks on phones ---- */
+.dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.dashboard-grid {
+  flex: 999 1 640px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quick-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.filter-btn {
+  font: 700 14px var(--font-mono);
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.filter-btn-active { background: var(--ink); color: var(--paper); }
+
+.grid-box {
+  border: 1px solid var(--ink);
+  overflow-x: auto; /* wide grid scrolls inside its box on small screens */
+}
+
+.grid-box .ag-root-wrapper { border: none; min-width: 940px; }
+
+/* AG Grid row and cell classes set by rowClassRules / cellClassRules */
+.grid-box .row-needs-ok { background: #FDF9DD; }
+.grid-box .cell-at-risk { color: var(--alert); font-weight: 700; }
+.grid-box .ag-row-pinned { background: var(--paper); font-weight: 700; }
+
+.sample-tag {
+  font: 400 11px var(--font-mono);
+  color: var(--faded);
+  border: 1px dashed var(--faded);
+  padding: 0 4px;
+  margin-left: 6px;
+}
+
+.insights {
+  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.insights-title { margin: 0; font: 700 14px var(--font-mono); letter-spacing: 0.06em; }
+
+.tile { background: var(--card); border: 1px solid var(--ink); padding: 16px; }
+.tile-attention { background: var(--highlight); }
+.tile-dark { background: var(--ink); color: var(--paper); }
+.tile-number { font: 700 32px var(--font-mono); line-height: 1.2; }
+.tile-number-won { color: var(--highlight); }
+
+/* ---- Disputes board (3C): three columns that stack on phones ---- */
+.board { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+
+.board-col {
+  flex: 1 1 300px;
+  min-width: 0;
+  background: var(--card);
+  border: 1px solid var(--ink);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.board-col-attention { background: #FDF9DD; }
+.board-col-won { background: var(--ink); color: var(--paper); }
+
+.board-col-title {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font: 700 14px var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.board-col-won .board-col-title { color: var(--highlight); }
+.board-col-won > .faded { color: #C9C9C9; }
+
+.board-count { border: 1px solid currentColor; padding: 0 8px; }
+
+.dispute-card {
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  border-top: 3px dashed var(--ink); /* the torn receipt-stub edge */
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.board-col-won .dispute-card { border-top-color: var(--highlight); }
+
+.dispute-card-top,
+.dispute-card-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.dispute-card-main strong { font-size: 18px; }
+.dispute-card .btn { align-self: flex-start; }
+
+/* ---- Ask Receipts drawer (2C) ---- */
+.ask-button {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 20;
+  min-height: 52px;
+  padding: 0 22px;
+  font: 700 16px var(--font-body);
+  background: var(--ink);
+  color: var(--highlight);
+  border: 2px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--highlight);
+  cursor: pointer;
+}
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(17, 17, 17, 0.35);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  width: 440px;
+  max-width: 100%;
+  background: var(--card);
+  border-left: 2px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(105%); /* parked off-screen to the right */
+  transition: transform 0.25s ease-out;
+}
+
+.drawer-open { transform: translateX(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer { transition: none; }
+}
+
+.drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 2px dashed var(--ink);
+}
+
+.drawer-title { margin: 0; font: 700 15px var(--font-mono); letter-spacing: 0.06em; }
+
+.drawer-body { flex: 1; min-height: 0; padding: 16px; display: flex; flex-direction: column; }
+.drawer-body .chat { flex: 1; min-height: 0; }
+.drawer-body .chat-log { flex: 1; max-height: none; }
 
 /* Wordmark highlight: a highlighter stroke behind the dot, not a tall block */
 .wordmark .mark {
