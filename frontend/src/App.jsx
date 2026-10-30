@@ -3,26 +3,40 @@ import { getHealth, getInvoices } from './api'
 import ChatDrawer from './components/ChatDrawer'
 import DemoStrip from './components/DemoStrip'
 import Header from './components/Header'
-import { SAMPLE_DISPUTES } from './data/sampleData'
+import { SAMPLE_DISPUTES, SAMPLE_DRAFTS } from './data/sampleData'
 import { TABS } from './lib/tabs'
 import DashboardPage from './pages/DashboardPage'
 import DisputesPage from './pages/DisputesPage'
 import InvoicesPage from './pages/InvoicesPage'
+import ReviewPage from './pages/ReviewPage'
 
-// Which tab is showing comes from the URL hash (#dashboard, #disputes, #invoices),
-// so the browser's back button and bookmarks work without a routing library.
-function tabFromHash() {
-  const id = window.location.hash.replace('#', '')
-  return TABS.some((t) => t.id === id) ? id : 'dashboard'
+// The URL hash says what to show: #dashboard, #disputes, #invoices, or #disputes/PP-D-4821 for one
+// dispute's review screen. Using the hash means Back, refresh and bookmarks all work, with no routing library.
+function routeFromHash() {
+  const [tab, disputeId] = window.location.hash.replace('#', '').split('/')
+  return {
+    tab: TABS.some((t) => t.id === tab) ? tab : 'dashboard',
+    disputeId: tab === 'disputes' && disputeId ? decodeURIComponent(disputeId) : null,
+  }
 }
 
 export default function App() {
-  const [tab, setTab] = useState(tabFromHash)
+  const [route, setRoute] = useState(routeFromHash)
+  const tab = route.tab
   const [invoices, setInvoices] = useState([])
   const [loadError, setLoadError] = useState(null)
   const [health, setHealth] = useState(null)
   const [syncing, setSyncing] = useState(false)
-  const disputes = SAMPLE_DISPUTES // sample data until the dispute backend exists
+  // Sample data until the dispute backend exists. Kept in state so approving one can move it on the board.
+  const [disputes, setDisputes] = useState(SAMPLE_DISPUTES)
+  const [flash, setFlash] = useState(null) // a one-off message shown on the board after an action
+
+  // Called by the review screen. Sample mode: this only changes what's on screen; nothing goes to PayPal.
+  function updateDispute(id, changes, message) {
+    setDisputes((all) => all.map((d) => (d.id === id ? { ...d, ...changes } : d)))
+    setFlash(message)
+    window.location.hash = 'disputes'
+  }
 
   const refreshInvoices = useCallback(() => {
     return getInvoices()
@@ -36,7 +50,7 @@ export default function App() {
   useEffect(() => {
     refreshInvoices()
     getHealth().then(setHealth).catch(() => setHealth(null))
-    const onHash = () => setTab(tabFromHash())
+    const onHash = () => setRoute(routeFromHash())
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [refreshInvoices])
@@ -56,10 +70,27 @@ export default function App() {
   return (
     <>
       {health?.demo_mode && <DemoStrip />}
-      <Header activeTab={tab} onTabChange={setTab} counts={counts} onSync={handleSync} syncing={syncing} />
+      <Header
+        activeTab={tab}
+        onTabChange={(id) => setRoute({ tab: id, disputeId: null })}
+        counts={counts}
+        onSync={handleSync}
+        syncing={syncing}
+      />
       <main className="page">
         {tab === 'dashboard' && <DashboardPage invoices={invoices} disputes={disputes} />}
-        {tab === 'disputes' && <DisputesPage disputes={disputes} />}
+        {tab === 'disputes' && !route.disputeId && (
+          <DisputesPage disputes={disputes} flash={flash} onDismissFlash={() => setFlash(null)} />
+        )}
+        {tab === 'disputes' && route.disputeId && (
+          <ReviewPage
+            key={route.disputeId} // a fresh working copy for each dispute
+            dispute={disputes.find((d) => d.id === route.disputeId)}
+            draft={SAMPLE_DRAFTS[route.disputeId]}
+            sampleMode
+            onUpdate={updateDispute}
+          />
+        )}
         {tab === 'invoices' && <InvoicesPage invoices={invoices} loadError={loadError} onChanged={refreshInvoices} />}
       </main>
       <ChatDrawer onInvoicesChanged={refreshInvoices} />

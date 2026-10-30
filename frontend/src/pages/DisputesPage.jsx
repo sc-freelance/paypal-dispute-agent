@@ -27,17 +27,25 @@ function DisputeCard({ d }) {
       </div>
       <div className="faded small">{d.note}</div>
       {d.stage === 'NEEDS_OK' && (
-        // The review screen comes next session; the button is in place for the flow.
-        <button type="button" className="btn btn-primary" disabled title="Review screen is coming next">
+        <a className="btn btn-primary btn-link" href={`#disputes/${encodeURIComponent(d.id)}`}>
           Review draft →
-        </button>
+        </a>
       )}
     </article>
   )
 }
 
-export default function DisputesPage({ disputes }) {
+export default function DisputesPage({ disputes, flash, onDismissFlash }) {
   return (
+    <>
+      {flash && (
+        <p className="flash" role="status">
+          {flash}{' '}
+          <button type="button" className="link-button" onClick={onDismissFlash}>
+            Dismiss
+          </button>
+        </p>
+      )}
     <div className="board">
       {COLUMNS.map((col) => {
         const cards = disputes.filter((d) => d.stage === col.stage)
@@ -54,5 +62,6 @@ export default function DisputesPage({ disputes }) {
         )
       })}
     </div>
+    </>
   )
 }
