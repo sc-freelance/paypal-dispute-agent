@@ -413,6 +413,125 @@ body {
 .drawer-body .chat { flex: 1; min-height: 0; }
 .drawer-body .chat-log { flex: 1; max-height: none; }
 
+/* ---- Review screen (5B): one printed receipt ---- */
+a { color: var(--ink); }
+a:hover { color: var(--faded); }
+.receipt-doc footer.actions { flex-direction: row; flex-wrap: wrap; align-items: center; }
+a.btn-link { display: inline-flex; align-items: center; text-decoration: none; align-self: flex-start; }
+a.btn-primary:hover { color: var(--highlight); }
+.btn-large { min-height: 52px; font-size: 17px; padding: 10px 20px; }
+
+.flash {
+  background: var(--card);
+  border: 1px solid var(--ink);
+  border-left-width: 6px;
+  padding: 10px 14px;
+  margin: 0 0 16px;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.receipt-doc {
+  margin-top: 16px;
+  background: var(--card);
+  border: 1px solid var(--ink);
+  border-top: 4px dashed var(--ink);
+  border-bottom: 4px dashed var(--ink);
+  padding: 28px clamp(16px, 4vw, 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.receipt-doc-section { display: flex; flex-direction: column; gap: 10px; }
+.receipt-doc-section + .receipt-doc-section { border-top: 2px dashed var(--ink); padding-top: 20px; }
+.receipt-doc p { margin: 0; }
+
+.receipt-doc-title { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; }
+.receipt-doc-title h1 { margin: 0; font-size: 34px; letter-spacing: -0.02em; }
+.receipt-doc-amount { font-size: 28px; font-weight: 700; }
+
+.client-quote {
+  margin: 4px 0 0;
+  padding: 12px 16px;
+  background: var(--paper);
+  border: 1px dashed var(--faded);
+  font-size: 17px;
+}
+
+.agent-note { padding: 12px 16px; background: var(--ink); color: var(--paper); font-size: 17px; }
+
+.section-title { margin: 0; font: 700 14px var(--font-mono); letter-spacing: 0.06em; }
+
+/* Claim cards (6A) */
+.claim-card { border: 1px solid var(--ink); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.claim-card-editing { border-width: 2px; background: #FDF9DD; }
+.claim-card-removed .claim-text { text-decoration: line-through; color: var(--faded); }
+.claim-card textarea { font: 16px var(--font-body); padding: 10px; border: 1px solid var(--ink); resize: vertical; }
+.claim-card .actions { align-items: center; margin-top: 0; }
+.claim-label { font: 700 13px var(--font-mono); }
+
+.footnote-refs { margin-left: 2px; }
+.footnote-ref {
+  font: 700 12px var(--font-mono);
+  background: none;
+  border: none;
+  padding: 0 2px;
+  color: var(--ink);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.gaps { background: #FDF9DD; margin: 0 calc(-1 * clamp(16px, 4vw, 32px)); padding-left: clamp(16px, 4vw, 32px); padding-right: clamp(16px, 4vw, 32px); padding-bottom: 16px; }
+.gaps ul { margin: 0; padding-left: 20px; }
+
+.sources { margin: 0; padding-left: 24px; font-size: 14px; line-height: 1.8; }
+.sources li { padding: 0 6px; transition: background 0.3s; }
+.source-highlight { background: var(--highlight); }
+.source-unused { color: var(--faded); text-decoration: line-through; }
+
+/* Confirmation window (7A): the browser's own <dialog> */
+.confirm-dialog {
+  width: 520px;
+  max-width: calc(100% - 32px);
+  border: 2px solid var(--ink);
+  border-top: 6px dashed var(--ink);
+  box-shadow: 8px 8px 0 var(--highlight);
+  padding: 28px;
+  box-sizing: border-box;
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+.confirm-dialog::backdrop { background: rgba(17, 17, 17, 0.45); }
+.confirm-dialog h2 { margin: 0 0 16px; font-size: 24px; }
+.confirm-dialog p { margin: 0 0 14px; }
+
+.confirm-facts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 0 0 16px;
+  font-size: 15px;
+}
+
+.confirm-facts dt { color: var(--faded); }
+.confirm-facts dd { margin: 0; font-weight: 700; }
+.confirm-warning { padding: 12px; background: #FDF9DD; border: 1px solid var(--ink); }
+.actions-end { justify-content: flex-end; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sources li { transition: none; }
+}
+
 /* Wordmark highlight: a highlighter stroke behind the dot, not a tall block */
 .wordmark .mark {
   padding: 0 2px;
