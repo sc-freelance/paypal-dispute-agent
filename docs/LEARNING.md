@@ -327,6 +327,44 @@ The floating **Ask Receipts** button and the slide-out panel holding the existin
 ### `src/index.css` (additions)
 Styles for the demo strip, top bar and tabs, the deadline tones, the dashboard layout (it stacks on phones), the grid's row and cell classes, the board columns and cards, and the drawer. There's also a reduced-motion rule.
 
+---
+
+## Fri 30 Oct: review screen, claim cards, confirmation window
+
+### `App.jsx` (updated)
+- **The web address now also selects a dispute:** `#disputes/PP-D-4821` opens that dispute's review screen. `routeFromHash()` splits the hash on `/`.
+- **The disputes live in state** (`useState(SAMPLE_DISPUTES)`). That way `updateDispute()` can move one to *Submitted* and show a one-off **flash** message on the board.
+- **`key={route.disputeId}` on `ReviewPage`** tells React to start fresh for each dispute, so edits to one don't leak into another.
+
+### `src/data/sampleData.js`: `SAMPLE_DRAFTS`
+This is what the dispute agent will return later:
+- `claims`: each has its `text` and a list of `sources`
+- `sources`: the records on file
+- `gaps`: things the client mentions that we have **no** record of
+
+### `src/pages/ReviewPage.jsx` (choice 5B)
+The printed-receipt review screen.
+- **It keeps a working copy of the claims** in state (`status: 'kept' | 'removed'`, plus `edited`), so the AI's original draft is never changed.
+- **Sources are numbered** in the order listed. Footnote buttons call `scrollIntoView()` and briefly highlight the source. They're buttons, not `#links`, because `#` links would change our hash and switch page.
+- **The `notes` text sent to PayPal** is the kept claims, numbered. Its length is checked against PayPal's **2,000-character** limit.
+- **`canApprove`** blocks Approve while editing, with no claims kept, or when the text is too long, and the reason is shown.
+- **Gaps get their own highlighted section,** "GAPS · NOT CLAIMED". That's the honesty rule made visible.
+
+### `src/components/ClaimCard.jsx` (choice 6A)
+One claim with **Keep / Edit / Remove**.
+- Editing uses a `<textarea>` with a proper `<label>`. Save is disabled if the text is empty.
+- The source numbers can't be changed, so **a claim always keeps the record that backs it up**.
+- `onEditingChange` tells the page a card is mid-edit, so Approve waits.
+
+### `src/components/ConfirmSendDialog.jsx` (choice 7A)
+A confirmation built on the browser's own **`<dialog>`** element.
+- **`showModal()`** dims the page (`::backdrop`), keeps keyboard focus inside, and closes on Escape, all accessible for free.
+- **Escape fires `onCancel`,** which we treat like the Cancel button.
+- **In sample mode it says plainly** that nothing is sent to PayPal.
+
+### Concept: controlled working copy
+The review screen copies the AI's draft into state and edits only the copy. That's why **Undo** works, and why it'll be easy to send exactly what you approved, not what the AI first wrote.
+
 ### Concept: cell renderer
 A small component a data grid uses to draw one cell. AG Grid passes it `value`, `data` (the whole row) and `node` (with flags like `rowPinned`). That's how the status column shows a styled chip instead of the text "DISPUTED".
 
